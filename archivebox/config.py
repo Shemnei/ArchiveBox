@@ -1059,13 +1059,6 @@ if not CONFIG['CHECK_SSL_VALIDITY']:
 
 
 def check_system_config(config: ConfigDict=CONFIG) -> None:
-    ### Check system environment
-    if config['USER'] == 'root':
-        stderr('[!] ArchiveBox should never be run as root!', color='red')
-        stderr('    For more information, see the security overview documentation:')
-        stderr('        https://github.com/ArchiveBox/ArchiveBox/wiki/Security-Overview#do-not-run-as-root')
-        raise SystemExit(2)
-
     ### Check Python environment
     if sys.version_info[:3] < (3, 6, 0):
         stderr(f'[X] Python version is not new enough: {config["PYTHON_VERSION"]} (>3.6 is required)', color='red')

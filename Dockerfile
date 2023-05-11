@@ -38,12 +38,7 @@ ENV TZ=UTC \
 ENV CODE_DIR=/app \
     VENV_PATH=/venv \
     DATA_DIR=/data \
-    NODE_DIR=/node \
-    ARCHIVEBOX_USER="archivebox"
-
-# Create non-privileged user for archivebox and chrome
-RUN groupadd --system $ARCHIVEBOX_USER \
-    && useradd --system --create-home --gid $ARCHIVEBOX_USER --groups audio,video $ARCHIVEBOX_USER
+    NODE_DIR=/node
 
 # Install system dependencies
 RUN apt-get update -qq \

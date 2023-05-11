@@ -14,11 +14,10 @@ REPO_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && cd .. && p
 cd "$REPO_DIR"
 which docker > /dev/null || exit 1
 
-
 TAG_NAME="dev"
 VERSION="$(jq -r '.version' < "$REPO_DIR/package.json")"
 SHORT_VERSION="$(echo "$VERSION" | perl -pe 's/(\d+)\.(\d+)\.(\d+)/$1.$2/g')"
-REQUIRED_PLATFORMS=('linux/arm64','linux/amd64','linux/arm/v8','linux/arm/v7')
+REQUIRED_PLATFORMS=('linux/amd64')
 
 function check_platforms() {
     INSTALLED_PLATFORMS="$(docker buildx inspect | grep 'Platforms:' )"
@@ -58,25 +57,14 @@ function recreate_builder() {
     create_builder
 }
 
-
 # Check if docker is ready for cross-plaform builds, if not, recreate builder
 docker buildx use xbuilder || create_builder
 check_platforms || (recreate_builder && check_platforms) || exit 1
 
-
 echo "[+] Building archivebox:$VERSION docker image..."
 #docker build . \
-docker buildx build --platform "$REQUIRED_PLATFORMS" --push . \
-               -t archivebox \
-               -t archivebox:$TAG_NAME \
-               -t archivebox:$VERSION \
-               -t archivebox:$SHORT_VERSION \
-               -t docker.io/nikisweeting/archivebox:$TAG_NAME \
-               -t docker.io/nikisweeting/archivebox:$VERSION \
-               -t docker.io/nikisweeting/archivebox:$SHORT_VERSION \
-               -t docker.io/archivebox/archivebox:$TAG_NAME \
-               -t docker.io/archivebox/archivebox:$VERSION \
-               -t docker.io/archivebox/archivebox:$SHORT_VERSION \
-               -t docker.pkg.github.com/archivebox/archivebox/archivebox:$TAG_NAME \
-               -t docker.pkg.github.com/archivebox/archivebox/archivebox:$VERSION \
-               -t docker.pkg.github.com/archivebox/archivebox/archivebox:$SHORT_VERSION
+docker buildx build --platform "$REQUIRED_PLATFORMS" --load . \
+               -t shemnei/archivebox \
+               -t shemnei/archivebox:$TAG_NAME \
+               -t shemnei/archivebox:$VERSION \
+               -t shemnei/archivebox:$SHORT_VERSION
