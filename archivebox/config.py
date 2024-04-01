@@ -1201,24 +1201,6 @@ if not CONFIG['CHECK_SSL_VALIDITY']:
 
 
 def check_system_config(config: ConfigDict=CONFIG) -> None:
-    ### Check system environment
-    if config['USER'] == 'root' or str(config['PUID']) == "0":
-        stderr('[!] ArchiveBox should never be run as root!', color='red')
-        stderr('    For more information, see the security overview documentation:')
-        stderr('        https://github.com/ArchiveBox/ArchiveBox/wiki/Security-Overview#do-not-run-as-root')
-        
-        if config['IN_DOCKER']:
-            attempted_command = ' '.join(sys.argv[:3])
-            stderr('')
-            stderr('    {lightred}Hint{reset}: When using Docker, you must run commands with {green}docker run{reset} instead of {lightyellow}docker exec{reset}, e.g.:'.format(**config['ANSI']))
-            stderr(f'        docker compose run archivebox {attempted_command}')
-            stderr(f'        docker run -it -v $PWD/data:/data archivebox/archivebox {attempted_command}')
-            stderr('        or:')
-            stderr(f'        docker compose exec --user=archivebox archivebox /bin/bash -c "archivebox {attempted_command}"')
-            stderr(f'        docker exec -it --user=archivebox <container id> /bin/bash -c "archivebox {attempted_command}"')
-        
-        raise SystemExit(2)
-
     ### Check Python environment
     if sys.version_info[:3] < (3, 7, 0):
         stderr(f'[X] Python version is not new enough: {config["PYTHON_VERSION"]} (>3.6 is required)', color='red')

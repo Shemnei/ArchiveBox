@@ -47,11 +47,6 @@ ENV TZ=UTC \
 ENV PYTHON_VERSION=3.11 \
     NODE_VERSION=20
 
-# User config
-ENV ARCHIVEBOX_USER="archivebox" \
-    DEFAULT_PUID=911 \
-    DEFAULT_PGID=911
-
 # Global paths
 ENV CODE_DIR=/app \
     DATA_DIR=/data \
@@ -91,17 +86,6 @@ RUN (echo "[i] Docker build for ArchiveBox $(cat /VERSION.txt) starting..." \
     && which dpkg && dpkg --version | head -n1 \
     && echo -e '\n\n' && env && echo -e '\n\n' \
     ) | tee -a /VERSION.txt
-
-# Create non-privileged user for archivebox and chrome
-RUN echo "[*] Setting up $ARCHIVEBOX_USER user uid=${DEFAULT_PUID}..." \
-    && groupadd --system $ARCHIVEBOX_USER \
-    && useradd --system --create-home --gid $ARCHIVEBOX_USER --groups audio,video $ARCHIVEBOX_USER \
-    && usermod -u "$DEFAULT_PUID" "$ARCHIVEBOX_USER" \
-    && groupmod -g "$DEFAULT_PGID" "$ARCHIVEBOX_USER" \
-    && echo -e "\nARCHIVEBOX_USER=$ARCHIVEBOX_USER PUID=$(id -u $ARCHIVEBOX_USER) PGID=$(id -g $ARCHIVEBOX_USER)\n\n" \
-    | tee -a /VERSION.txt
-    # DEFAULT_PUID and DEFAULT_PID are overriden by PUID and PGID in /bin/docker_entrypoint.sh at runtime
-    # https://docs.linuxserver.io/general/understanding-puid-and-pgid
 
 # Install system apt dependencies (adding backports to access more recent apt updates)
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked,id=apt-$TARGETARCH$TARGETVARIANT \
@@ -197,10 +181,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked,id=apt-$TARGETARCH$T
     fi \
     && rm -rf /var/lib/apt/lists/* \
     && ln -s "$CHROME_BINARY" /usr/bin/chromium-browser \
-    && mkdir -p "/home/${ARCHIVEBOX_USER}/.config/chromium/Crash Reports/pending/" \
-    && chown -R $ARCHIVEBOX_USER "/home/${ARCHIVEBOX_USER}/.config" \
     && mkdir -p "$PLAYWRIGHT_BROWSERS_PATH" \
-    && chown -R $ARCHIVEBOX_USER "$PLAYWRIGHT_BROWSERS_PATH" \
     # Save version info
     && ( \
         which chromium-browser && /usr/bin/chromium-browser --version || /usr/lib/chromium/chromium --version \
